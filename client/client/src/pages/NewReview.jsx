@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import API from '../services/api'; // Use your centralized Axios client!
 
 export default function NewReview() {
   const [title, setTitle] = useState('');
@@ -43,24 +44,14 @@ export default function NewReview() {
     setError(null);
 
     try {
-      const response = await fetch('http://localhost:5000/api/reviews', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          title,
-          language,
-          sourceCode,
-        }),
+      // Use your configured API client pointing to your Vercel backend
+      const response = await API.post('/reviews', {
+        title,
+        language,
+        sourceCode,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to submit code review.');
-      }
+      const data = response.data;
 
       // Safely grab ID from any potential response structure (_id, id, review._id)
       const reviewId = data._id || data.id || data.review?._id || data.data?._id;
@@ -73,7 +64,7 @@ export default function NewReview() {
       navigate(`/review/${reviewId}`);
     } catch (err) {
       console.error('Submission Error:', err);
-      setError(err.message || 'Something went wrong while submitting.');
+      setError(err.response?.data?.error || err.message || 'Something went wrong while submitting.');
     } finally {
       setLoading(false);
     }
@@ -148,7 +139,7 @@ export default function NewReview() {
         <div className="flex justify-end gap-3">
           <button
             type="button"
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/dashboard')}
             className="px-5 py-2.5 rounded-xl border border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800 transition text-sm font-medium"
           >
             Cancel
