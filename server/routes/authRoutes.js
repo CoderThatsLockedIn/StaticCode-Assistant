@@ -14,5 +14,4 @@ router.post('/login', loginUser);
 router.post('/logout', logoutUser);
 router.get('/verify', protect, verifySession);
 
-// CRITICAL: Ensure this default export is at the very bottom
 export default router;
