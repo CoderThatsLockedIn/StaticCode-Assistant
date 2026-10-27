@@ -4,15 +4,13 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import NewReview from './pages/NewReview';
-// Import your past reviews page component here, e.g.:
-// import PastReviews from './pages/PastReviews'; 
+import ReviewDetail from './pages/ReviewDetail'; // CRITICAL: Import this page component
 import Navbar from './components/Navbar';
 import { useAuth } from './context/AuthContext';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
-  // Hold off rendering until the initial session check completes
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-zinc-950 text-zinc-400 text-sm">
@@ -41,7 +39,7 @@ export default function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      {/* All authenticated workspace pages live here */}
+      {/* Authenticated Workspace Routes */}
       <Route 
         element={
           <ProtectedRoute>
@@ -51,8 +49,7 @@ export default function App() {
       >
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/new-review" element={<NewReview />} />
-        {/* Add your past reviews route here once the component is ready: */}
-        {/* <Route path="/past-reviews" element={<PastReviews />} /> */}
+        <Route path="/review/:id" element={<ReviewDetail />} /> {/* CRITICAL: Handles past & new review details */}
       </Route>
 
       <Route path="*" element={<Navigate to="/login" replace />} />
