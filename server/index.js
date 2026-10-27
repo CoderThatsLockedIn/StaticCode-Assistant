@@ -7,24 +7,11 @@ import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
 
-connectDB();
-
 const app = express();
 
-const allowedOrigins = [
-  'http://localhost:5173',
-  'https://static-code-assistant.vercel.app',
-  'https://static-code-assistant-2ihaf4wo2.vercel.app'
-];
-
+// Dynamically allow all Vercel and local origins to prevent CORS mismatch errors
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
-      return callback(null, true);
-    }
-    return callback(new Error('Blocked by CORS'), false);
-  },
+  origin: true,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
@@ -32,6 +19,17 @@ app.use(cors({
 
 app.use(express.json());
 app.use(cookieParser());
+
+// Connect to DB on request for serverless stability
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error('Database connection error:', err);
+    res.status(500).json({ error: 'Database connection failed' });
+  }
+});
 
 app.use('/api/auth', authRoutes);
 app.use('/api/reviews', reviewRoutes);
