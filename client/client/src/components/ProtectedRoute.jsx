@@ -13,6 +13,5 @@ export default function ProtectedRoute() {
     );
   }
 
-  // If loading is finished and user exists, render the nested child routes via Outlet
   return user ? <Outlet /> : <Navigate to="/login" replace />;
 }
