@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import API from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -8,16 +8,25 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { user, login } = useAuth();
+
+  // If already authenticated (e.g. from the successful verify check), redirect instantly
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     try {
       const response = await API.post('/auth/login', { email, password });
       
-      // Update global context state before redirecting
-      login(response.data.data);
+      // Update global context state
+      login(response.data.data || response.data.user);
       
+      // Navigate to dashboard
       navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed');
