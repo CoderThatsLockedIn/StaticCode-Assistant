@@ -3,14 +3,16 @@ import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
-import NewReview from './pages/NewReview'; // Make sure this file exists in your pages folder!
+import NewReview from './pages/NewReview';
+// Import your past reviews page component here, e.g.:
+// import PastReviews from './pages/PastReviews'; 
 import Navbar from './components/Navbar';
 import { useAuth } from './context/AuthContext';
 
-// Protected Route wrapper that waits for loading to finish
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
+  // Hold off rendering until the initial session check completes
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-zinc-950 text-zinc-400 text-sm">
@@ -22,7 +24,6 @@ const ProtectedRoute = ({ children }) => {
   return user ? children : <Navigate to="/login" replace />;
 };
 
-// Layout wrapper that keeps the Navbar persistent across authenticated pages
 const MainLayout = () => {
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
@@ -37,11 +38,10 @@ const MainLayout = () => {
 export default function App() {
   return (
     <Routes>
-      {/* Public Auth Routes */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      {/* Protected Routes wrapped with the persistent Navbar Layout */}
+      {/* All authenticated workspace pages live here */}
       <Route 
         element={
           <ProtectedRoute>
@@ -51,9 +51,10 @@ export default function App() {
       >
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/new-review" element={<NewReview />} />
+        {/* Add your past reviews route here once the component is ready: */}
+        {/* <Route path="/past-reviews" element={<PastReviews />} /> */}
       </Route>
 
-      {/* Fallback redirect */}
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
