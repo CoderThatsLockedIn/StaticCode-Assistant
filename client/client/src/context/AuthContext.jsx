@@ -7,7 +7,6 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Verify session exactly once when the app mounts
   useEffect(() => {
     const verifySession = async () => {
       try {
