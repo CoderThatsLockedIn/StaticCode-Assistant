@@ -19,10 +19,7 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (Postman, mobile, server-to-server)
     if (!origin) return callback(null, true);
-    
-    // Check exact whitelist or allow any .vercel.app deployment preview
     if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
       return callback(null, true);
     }
@@ -33,17 +30,12 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
-// Handle OPTIONS preflight requests explicitly
-app.options('*', cors());
-
 app.use(express.json());
 app.use(cookieParser());
 
-// Mount Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/reviews', reviewRoutes);
 
-// Only listen locally
 if (process.env.NODE_ENV !== 'production') {
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => {
