@@ -1,8 +1,11 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
-  withCredentials: true, // Required to send and receive HttpOnly cookies automatically
+  baseURL: 'https://static-code-assistant-server.vercel.app/api',
+  withCredentials: true, // CRITICAL: Ensures cookies are sent with every request across subdomains
+  headers: {
+    'Content-Type': 'application/json'
+  }
 });
 
 export default API;
