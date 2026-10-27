@@ -1,17 +1,23 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import API from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await API.post('/auth/login', { email, password });
+      const response = await API.post('/auth/login', { email, password });
+      
+      // Update global context state before redirecting
+      login(response.data.data);
+      
       navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed');
