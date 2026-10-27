@@ -11,7 +11,10 @@ const app = express();
 
 // Dynamically allow all Vercel and local origins to prevent CORS mismatch errors
 app.use(cors({
-  origin: true,
+  origin: [
+    'http://localhost:5173', // Local development
+    'https://static-code-assistant.vercel.app' // Replace with your exact frontend Vercel URL
+  ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
