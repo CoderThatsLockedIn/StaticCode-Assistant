@@ -1,20 +1,18 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import API from '../services/api';
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Check if the user is authenticated on initial load / refresh
+  // Verify session exactly once when the app mounts
   useEffect(() => {
-    const checkAuth = async () => {
+    const verifySession = async () => {
       try {
         const response = await API.get('/auth/verify');
-        // Handle both response structures safely
-        setUser(response.data.data || response.data.user || response.data);
+        setUser(response.data.data);
       } catch (err) {
         setUser(null);
       } finally {
@@ -22,7 +20,7 @@ export const AuthProvider = ({ children }) => {
       }
     };
 
-    checkAuth();
+    verifySession();
   }, []);
 
   const login = (userData) => {
@@ -34,14 +32,13 @@ export const AuthProvider = ({ children }) => {
       await API.post('/auth/logout');
     } catch (err) {
       console.error('Logout error:', err);
-    } finally {
-      setUser(null);
     }
+    setUser(null);
   };
 
   return (
     <AuthContext.Provider value={{ user, loading, login, logout }}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };
