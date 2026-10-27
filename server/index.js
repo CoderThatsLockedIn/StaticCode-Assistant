@@ -11,9 +11,21 @@ connectDB();
 
 const app = express();
 
+const allowedOrigins = [
+  'http://localhost:5173',                  // For local development
+  'https://static-code-assistant.vercel.app' // Your live frontend Vercel URL
+];
+
 app.use(cors({
-  origin: 'http://localhost:5173', // Vite frontend origin
-  credentials: true              // Required for cookies across domains/ports
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      return callback(new Error('Blocked by CORS'), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true // Required for sending cookies across domains
 }));
 app.use(express.json());
 app.use(cookieParser());           // Parse incoming cookies
