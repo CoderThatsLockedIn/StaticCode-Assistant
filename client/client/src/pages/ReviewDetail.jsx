@@ -1,81 +1,91 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import API from '../services/api';
 
 export default function ReviewDetail() {
   const { id } = useParams();
   const [review, setReview] = useState(null);
-  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    API.get(`/reviews/${id}`)
-      .then((res) => setReview(res.data.data))
-      .catch((err) => setError(err.response?.data?.error || 'Failed to fetch review details'));
+    const fetchReview = async () => {
+      try {
+        const response = await API.get(`/reviews/${id}`);
+        setReview(response.data.data || response.data);
+      } catch (err) {
+        setError(err.response?.data?.error || 'Failed to load review analysis.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReview();
   }, [id]);
 
-  if (error) return <div className="max-w-4xl mx-auto mt-10 p-4 bg-red-950 text-red-300 rounded-xl">{error}</div>;
-  if (!review) return <div className="max-w-4xl mx-auto mt-10 text-zinc-400">Loading analysis details...</div>;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh] text-zinc-400 text-sm">
+        Loading security analysis...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="p-4 bg-red-950/50 border border-red-800 text-red-300 rounded-xl text-sm">
+          {error}
+        </div>
+        <button onClick={() => navigate('/dashboard')} className="mt-4 text-sm text-indigo-400 hover:underline">
+          ← Back to Dashboard
+        </button>
+      </div>
+    );
+  }
+
+  if (!review) return null;
 
   return (
-    <div className="max-w-5xl mx-auto mt-10 px-4 pb-16">
-      <Link to="/dashboard" className="text-sm text-indigo-400 hover:underline mb-6 inline-block">← Back to Dashboard</Link>
-      
-      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-8">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold text-white">{review.title}</h2>
-          <span className="text-xs uppercase font-bold px-2.5 py-1 bg-zinc-800 text-zinc-300 rounded">{review.language}</span>
-        </div>
-        <div className="flex gap-3 text-xs mb-6">
-          <span className="px-2.5 py-1 bg-red-950 text-red-400 rounded border border-red-900/50">High: {review.summary?.high ?? 0}</span>
-          <span className="px-2.5 py-1 bg-amber-950 text-amber-400 rounded border border-amber-900/50">Medium: {review.summary?.medium ?? 0}</span>
-          <span className="px-2.5 py-1 bg-blue-950 text-blue-400 rounded border border-blue-900/50">Low: {review.summary?.low ?? 0}</span>
-        </div>
+    <div className="max-w-4xl mx-auto p-6 text-zinc-100">
+      <button 
+        onClick={() => navigate('/dashboard')} 
+        className="mb-6 text-sm text-indigo-400 hover:text-indigo-300 transition flex items-center gap-1"
+      >
+        ← Back to Dashboard
+      </button>
 
-        {/* Source Code Viewer */}
-        <h3 className="text-sm font-semibold text-zinc-300 mb-2">Submitted Source Code</h3>
-        <pre className="bg-zinc-950 border border-zinc-800 p-4 rounded-xl text-xs text-zinc-300 overflow-x-auto font-mono">
-          <code>{review.sourceCode}</code>
-        </pre>
+      <div className="mb-6 flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">{review.title}</h1>
+          <p className="text-zinc-400 text-sm mt-1 uppercase tracking-wider font-semibold">
+            Language: {review.language}
+          </p>
+        </div>
       </div>
 
-      {/* AI Findings & Feedback Section */}
-      <h3 className="text-xl font-bold text-white mb-4">AI Findings & Recommendations</h3>
-      {review.findings.length === 0 ? (
-        <div className="p-6 bg-zinc-900/50 border border-zinc-800 rounded-2xl text-emerald-400 text-sm">
-          🎉 No issues found! Your code is clean and well-structured.
+      {/* Source Code Box */}
+      <div className="mb-8">
+        <h3 className="text-sm font-medium text-zinc-300 mb-2">Submitted Source Code</h3>
+        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 font-mono text-sm overflow-x-auto text-zinc-200">
+          <pre>{review.sourceCode}</pre>
         </div>
-      ) : (
-        <div className="flex flex-col gap-4">
-          {review.findings.map((finding, index) => (
-            <div key={index} className="p-6 bg-zinc-900 border border-zinc-800 rounded-2xl">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-3">
-                  <span className="text-xs font-bold px-2 py-0.5 bg-indigo-950 text-indigo-400 border border-indigo-900/50 rounded">
-                    {finding.category}
-                  </span>
-                  <span className={`text-xs font-bold px-2 py-0.5 rounded ${
-                    finding.severity === 'High' ? 'bg-red-950 text-red-400 border border-red-900/50' :
-                    finding.severity === 'Medium' ? 'bg-amber-950 text-amber-400 border border-amber-900/50' :
-                    'bg-blue-950 text-blue-400 border border-blue-900/50'
-                  }`}>
-                    {finding.severity} Severity
-                  </span>
-                </div>
-                {finding.lineStart && (
-                  <span className="text-xs text-zinc-500 font-mono">Lines {finding.lineStart}-{finding.lineEnd || finding.lineStart}</span>
-                )}
-              </div>
-              <p className="text-sm text-zinc-200 mb-3">{finding.message}</p>
-              {finding.suggestedFix && (
-                <div className="mt-3 p-3 bg-zinc-950 border border-zinc-800 rounded-xl text-xs">
-                  <span className="text-indigo-400 font-semibold block mb-1">Suggested Fix:</span>
-                  <span className="text-zinc-300 font-mono">{finding.suggestedFix}</span>
-                </div>
-              )}
+      </div>
+
+      {/* Vulnerability Analysis Results */}
+      <div>
+        <h3 className="text-xl font-bold mb-4">Vulnerability & Static Analysis Report</h3>
+        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 text-zinc-300 space-y-4">
+          {review.analysis ? (
+            <div className="whitespace-pre-wrap font-sans text-sm leading-relaxed">
+              {typeof review.analysis === 'string' ? review.analysis : JSON.stringify(review.analysis, null, 2)}
             </div>
-          ))}
+          ) : (
+            <p className="text-zinc-500 italic">No vulnerability findings recorded for this session.</p>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
