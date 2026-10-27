@@ -5,10 +5,9 @@ import { protect } from '../middleware/authMiddleware.js';
 const router = express.Router();
 
 router.route('/')
-  .get(protect, getReviewSession)
-  .post(protect, createReviewHistory);
+  .get(protect, getReviewHistory)
+  .post(protect, createReviewSession);
 
-// CRITICAL: This route must exist to feed data into ReviewDetail.jsx
 router.route('/:id')
   .get(protect, getReviewById);
 
