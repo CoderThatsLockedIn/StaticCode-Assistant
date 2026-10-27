@@ -50,10 +50,10 @@ You must respond with a JSON object matching this exact structure:
 }
 `;
 
-  const modelName = 'gemini-3.8-flash';
-  const TIMEOUT_MS = 8000; // 8-second timeout limit
+  const modelName = 'gemini-3.5-flash-lite';
+  const TIMEOUT_MS = 15000; // 15 seconds is plenty for the Lite model
 
-  // Retry up to 3 times with exponential backoff for temporary 503 traffic spikes
+  // Retry up to 3 times with exponential backoff if needed
   for (let attempt = 1; attempt <= 3; attempt++) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
