@@ -14,7 +14,8 @@ const app = express();
 const allowedOrigins = [
   'http://localhost:5173',                  // For local development
   'https://static-code-assistant.vercel.app',
-  'https://static-code-assistant.vercel.app/' // Your live frontend Vercel URL
+  'https://static-code-assistant-2ihaf4wo2.vercel.app',
+  /\.vercel\.app$/ // Your live frontend Vercel URL
 ];
 
 app.use(cors({
