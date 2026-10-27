@@ -12,32 +12,38 @@ connectDB();
 const app = express();
 
 const allowedOrigins = [
-  'http://localhost:5173',                  // For local development
+  'http://localhost:5173',
   'https://static-code-assistant.vercel.app',
-  'https://static-code-assistant-2ihaf4wo2.vercel.app',
-  /\.vercel\.app$/ // Your live frontend Vercel URL
+  'https://static-code-assistant-2ihaf4wo2.vercel.app'
 ];
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or Postman)
+    // Allow requests with no origin (Postman, mobile, server-to-server)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
-      return callback(new Error('Blocked by CORS'), false);
+    
+    // Check exact whitelist or allow any .vercel.app deployment preview
+    if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+      return callback(null, true);
     }
-    return callback(null, true);
+    return callback(new Error('Blocked by CORS'), false);
   },
-  credentials: true // Required for sending cookies across domains
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
+// Handle OPTIONS preflight requests explicitly
+app.options('*', cors());
+
 app.use(express.json());
-app.use(cookieParser()); // Parse incoming cookies
+app.use(cookieParser());
 
 // Mount Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/reviews', reviewRoutes);
 
-// Only listen locally; Vercel handles serverless execution automatically
+// Only listen locally
 if (process.env.NODE_ENV !== 'production') {
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => {
@@ -45,5 +51,4 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-// Export the app for Vercel using ES Module syntax
 export default app;
