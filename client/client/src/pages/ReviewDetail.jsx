@@ -65,7 +65,6 @@ export default function ReviewDetail() {
         </div>
       </div>
 
-      {/* Source Code Box */}
       <div className="mb-8">
         <h3 className="text-sm font-medium text-zinc-300 mb-2">Submitted Source Code</h3>
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 font-mono text-sm overflow-x-auto text-zinc-200">
@@ -73,13 +72,14 @@ export default function ReviewDetail() {
         </div>
       </div>
 
-      {/* Vulnerability Analysis Results */}
       <div>
         <h3 className="text-xl font-bold mb-4">Vulnerability & Static Analysis Report</h3>
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 text-zinc-300 space-y-4">
-          {review.analysis ? (
+          {review.findings || review.summary || review.analysis ? (
             <div className="whitespace-pre-wrap font-sans text-sm leading-relaxed">
-              {typeof review.analysis === 'string' ? review.analysis : JSON.stringify(review.analysis, null, 2)}
+              {typeof (review.findings || review.summary || review.analysis) === 'string'
+                ? (review.findings || review.summary || review.analysis)
+                : JSON.stringify(review.findings || review.summary || review.analysis, null, 2)}
             </div>
           ) : (
             <p className="text-zinc-500 italic">No vulnerability findings recorded for this session.</p>
