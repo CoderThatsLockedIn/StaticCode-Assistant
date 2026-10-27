@@ -1,7 +1,6 @@
 import ReviewSession from '../models/models.ReviewSession.js';
 import { analyzeCode } from '../utils/staticAnalyzer.js';
 
-// Submit code for static analysis and save session
 export const createReviewSession = async (req, res) => {
   try {
     const { title, language, sourceCode } = req.body;
@@ -10,7 +9,6 @@ export const createReviewSession = async (req, res) => {
       return res.status(400).json({ error: 'Please provide both sourceCode and language.' });
     }
 
-    // Await AI analysis
     const analysisResult = await analyzeCode(sourceCode, language);
 
     const newSession = await ReviewSession.create({
@@ -34,7 +32,6 @@ export const createReviewSession = async (req, res) => {
   }
 };
 
-// Get all past review sessions for the logged-in user
 export const getReviewHistory = async (req, res) => {
   try {
     const sessions = await ReviewSession.find({ user: req.user._id })
@@ -48,17 +45,14 @@ export const getReviewHistory = async (req, res) => {
   }
 };
 
-// Get a single review session by ID (secured to user)
 export const getReviewById = async (req, res) => {
   try {
-    // FIXED: Changed Review to ReviewSession to match your import
     const review = await ReviewSession.findById(req.params.id);
     
     if (!review) {
       return res.status(404).json({ success: false, error: 'Review not found' });
     }
 
-    // Ensure user owns the review
     if (review.user.toString() !== req.user._id.toString()) {
       return res.status(401).json({ success: false, error: 'Not authorized' });
     }
