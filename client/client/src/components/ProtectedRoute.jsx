@@ -6,11 +6,7 @@ export default function ProtectedRoute() {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-zinc-950 text-zinc-400 text-sm">
-        Verifying session...
-      </div>
-    );
+    return null;
   }
 
   return user ? <Outlet /> : <Navigate to="/login" replace />;
