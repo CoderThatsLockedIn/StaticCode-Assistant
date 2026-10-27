@@ -1,23 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import API from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 export default function ProtectedRoute() {
-  const [isAuthenticated, setIsAuthenticated] = useState(null);
+  const { user, loading } = useAuth();
 
-  useEffect(() => {
-    API.get('/auth/verify')
-      .then((res) => setIsAuthenticated(res.data.isAuthenticated))
-      .catch(() => setIsAuthenticated(false));
-  }, []);
-
-  if (isAuthenticated === null) {
+  if (loading) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-zinc-400 text-sm">
+      <div className="flex items-center justify-center min-h-screen bg-zinc-950 text-zinc-400 text-sm">
         Verifying session...
       </div>
     );
   }
 
-  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
+  // If loading is finished and user exists, render the nested child routes via Outlet
+  return user ? <Outlet /> : <Navigate to="/login" replace />;
 }
