@@ -1,12 +1,12 @@
 import express from 'express';
-import { createReview, getReviews, getReviewById } from '../controllers/reviewController.js';
+import { createReviewSession, getReviewHistory, getReviewById } from '../controllers/reviewController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 router.route('/')
-  .get(protect, getReviews)
-  .post(protect, createReview);
+  .get(protect, getReviewSession)
+  .post(protect, createReviewHistory);
 
 // CRITICAL: This route must exist to feed data into ReviewDetail.jsx
 router.route('/:id')
