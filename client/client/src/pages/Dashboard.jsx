@@ -4,12 +4,25 @@ import API from '../services/api';
 
 export default function Dashboard() {
   const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    API.get('/reviews')
-      .then((res) => setReviews(res.data.data))
-      .catch((err) => setError(err.response?.data?.error || 'Failed to fetch reviews'));
+    const fetchReviews = async () => {
+      try {
+        setLoading(true);
+        const res = await API.get('/reviews');
+        // Safely extract array data matching your backend controller response
+        const reviewData = res.data?.data || res.data || [];
+        setReviews(Array.isArray(reviewData) ? reviewData : []);
+      } catch (err) {
+        setError(err.response?.data?.error || 'Failed to fetch reviews');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReviews();
   }, []);
 
   return (
@@ -23,8 +36,12 @@ export default function Dashboard() {
           + New Code Review
         </Link>
       </div>
+
       {error && <div className="mb-6 p-4 bg-red-950 border border-red-900 text-red-300 rounded-xl text-sm">{error}</div>}
-      {reviews.length === 0 ? (
+
+      {loading ? (
+        <div className="text-center py-16 text-zinc-400">Loading review history...</div>
+      ) : reviews.length === 0 ? (
         <div className="text-center py-16 bg-zinc-900/50 border border-zinc-800 rounded-2xl">
           <p className="text-zinc-400 mb-4">No review sessions found yet.</p>
           <Link to="/review/new" className="text-indigo-400 font-medium hover:underline text-sm">Start your first code analysis →</Link>
