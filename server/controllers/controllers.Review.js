@@ -51,13 +51,20 @@ export const getReviewHistory = async (req, res) => {
 // Get a single review session by ID (secured to user)
 export const getReviewById = async (req, res) => {
   try {
-    const session = await ReviewSession.findOne({ _id: req.params.id, user: req.user._id });
-    if (!session) {
-      return res.status(404).json({ error: 'Review session not found.' });
+    // FIXED: Changed Review to ReviewSession to match your import
+    const review = await ReviewSession.findById(req.params.id);
+    
+    if (!review) {
+      return res.status(404).json({ success: false, error: 'Review not found' });
     }
-    res.status(200).json({ success: true, data: session });
+
+    // Ensure user owns the review
+    if (review.user.toString() !== req.user._id.toString()) {
+      return res.status(401).json({ success: false, error: 'Not authorized' });
+    }
+
+    res.status(200).json({ success: true, data: review });
   } catch (error) {
-    console.error('Error fetching review session:', error);
-    res.status(500).json({ error: 'Server error.' });
+    res.status(500).json({ success: false, error: error.message });
   }
 };
